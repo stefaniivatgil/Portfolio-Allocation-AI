@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
-import json
 
 # =========================
 # Page / Theme
@@ -177,7 +176,7 @@ if "assets" not in st.session_state:
     ]
 
 # =========================
-# Sidebar
+# Sidebar (no save/load, only Run)
 # =========================
 with st.sidebar:
     st.markdown('<div class="sidebar-title">Portfolio Setup</div>', unsafe_allow_html=True)
@@ -224,34 +223,7 @@ with st.sidebar:
     show_indicators = st.toggle("Show Technical Indicators (SMA20 + RSI)", value=False)
 
     st.markdown("---")
-    saved_name = st.text_input("Portfolio Name")
-    load_file = st.file_uploader("Load Portfolio JSON", type="json")
-
-    colA, colB = st.columns(2)
-    with colA: save_click = st.button("Save")
-    with colB: run_click  = st.button("Run")
-
-if load_file is not None:
-    try:
-        loaded = json.load(load_file)
-        if "assets" in loaded and isinstance(loaded["assets"], list):
-            st.session_state.assets = loaded["assets"]
-        else:
-            tickers = [t.strip().upper() for t in loaded.get("tickers","").split(",") if t.strip()]
-            weights = [float(w) for w in loaded.get("weights","").split(",") if w.strip()]
-            st.session_state.assets = [{"ticker": t, "weight": w} for t, w in zip(tickers, weights)]
-        st.success("Portfolio loaded. Press Run.")
-    except Exception as e:
-        st.error(f"Failed to load: {e}")
-
-if save_click:
-    if saved_name:
-        payload = {"assets": st.session_state.assets}
-        st.download_button("Download JSON", data=json.dumps(payload, indent=2),
-                           file_name=f"{saved_name}.json", mime="application/json",
-                           use_container_width=True)
-    else:
-        st.warning("Give your portfolio a name first.")
+    run_click = st.button("Run")
 
 # =========================
 # Helpers
